@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, CheckBox } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, CheckBox, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { addProjectToFirestore } from '../firbase/data/firestoreUtility';
 import { auth } from '../firbase/firebase.settings';
-
 
 const languageOptions = [
   { id: 'java', label: 'Java' },
@@ -13,7 +12,7 @@ const languageOptions = [
   { id: 'css', label: 'CSS' },
 ];
 
-export function NewProject() {
+export function NewProject({ navigation }) {
   const [projectName, setProjectName] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -27,24 +26,53 @@ export function NewProject() {
     html: false,
     css: false
   });
-  const userId = auth.currentUser ? auth.currentUser.uid : null;
 
+  const userId = auth.currentUser ? auth.currentUser.uid : null;
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     const selectedLanguagesList = Object.keys(languages).filter(lang => languages[lang]);
     const projectData = {
-        userId, 
-        projectName,
-        startDate,
-        endDate,
-        selectedProjectType,
-        selectedLanguages: selectedLanguagesList,
-        numberOfPages,
-        difficulty
+      userId, 
+      projectName,
+      startDate,
+      endDate,
+      selectedProjectType,
+      selectedLanguages: selectedLanguagesList,
+      numberOfPages,
+      difficulty
     };
-    
-    await addProjectToFirestore(projectData);
-};
+
+    try {
+      await addProjectToFirestore(projectData);
+      setIsLoading(false);
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        navigation.navigate('UserArea', { screen: 'TSM2.0' });
+      }, 2000);
+    } catch (error) {
+      console.error("Error adding project: ", error);
+      setIsLoading(false);
+    }
+  };
+
+  if(isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if(showSuccessMessage) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>Projekt erfolgreich erstellt!</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -59,15 +87,15 @@ export function NewProject() {
 
       <Text>Project Art:</Text>
       <Picker
-          style={styles.picker}
-          selectedValue={selectedProjectType}
-          onValueChange={(itemValue) => setSelectedProjectType(itemValue)}
+        style={styles.picker}
+        selectedValue={selectedProjectType}
+        onValueChange={(itemValue) => setSelectedProjectType(itemValue)}
       >
-          <Picker.Item label="Bitte auswählen" value="" />
-          <Picker.Item label="Website" value="website" />
-          <Picker.Item label="App" value="app" />
-          <Picker.Item label="Singlepage" value="singlepage" />
-          <Picker.Item label="Andere" value="other" />
+        <Picker.Item label="Bitte auswählen" value="" />
+        <Picker.Item label="Website" value="website" />
+        <Picker.Item label="App" value="app" />
+        <Picker.Item label="Singlepage" value="singlepage" />
+        <Picker.Item label="Andere" value="other" />
       </Picker>
 
       <Text>Sprachen:</Text>
@@ -113,6 +141,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   input: {
     borderWidth: 1,
     borderColor: 'grey',
@@ -137,6 +169,10 @@ const styles = StyleSheet.create({
     marginBottom: 15
   },
 });
+
+
+
+
 
 
 
