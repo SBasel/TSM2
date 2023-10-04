@@ -12,94 +12,82 @@ export function MyProjects() {
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [startTimestamp, setStartTimestamp] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-    const fetchProjects = () => {
-    return new Promise((resolve, reject) => {
+    const getElapsedTime = () => {
+        if (!startTimestamp) return 0;
+        return Math.floor((Date.now() - startTimestamp) / 1000); // in Sekunden
+    };
+
+    const fetchProjects = async () => {
         if (!userId) {
-            reject("User ID not available.");
+            console.error("User ID not available.");
             return;
         }
 
         const projectsRef = collection(db, 'projects');
         const q = query(projectsRef, where('userId', '==', userId));
-        
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        onSnapshot(q, (querySnapshot) => {
             const projectsList = [];
-            let updatedSelectedProject = null;
             querySnapshot.forEach(doc => {
                 const project = {
                     id: doc.id,
                     ...doc.data()
                 };
                 projectsList.push(project);
-                if (selectedProject && doc.id === selectedProject.id) {
-                    updatedSelectedProject = project;
-                }
             });
             setProjects(projectsList);
-            if (updatedSelectedProject) {
-                setSelectedProject(updatedSelectedProject);
-            }
-            resolve(projectsList);
         });
-    });
-};
-
-
-
-    useEffect(() => {
-    if (userId) {
-        fetchProjects().catch(err => {
-            console.error("Failed to fetch projects:", err);
-        });
-    }
-}, [userId]);
-
-
-    const handleProjectPress = (project) => {
-        setSelectedProject(project);
-        setModalVisible(true);
     };
 
     useEffect(() => {
+        if (userId) {
+            fetchProjects();
+        }
+    }, [userId]);
+
+    useEffect(() => {
         let timer;
-        if (elapsedTime > 0) {
-            timer = setTimeout(() => {
-                setElapsedTime(prev => prev + 1);
+        if (startTimestamp) {
+            timer = setInterval(() => {
+                setElapsedTime(getElapsedTime());
             }, 1000);
         }
-        return () => clearTimeout(timer);
-    }, [elapsedTime]);
-
-    const stopTimerAndSave = async () => {
-    if (elapsedTime > 0) {
-        setIsLoading(true);
-        setElapsedTime(0); 
-        await saveElapsedTimeToFirestore(selectedProject.id, elapsedTime);
-        await fetchProjects();
-        setIsLoading(false);
-    }
-};
+        return () => clearInterval(timer);
+    }, [startTimestamp]);
 
     const handleStartStop = async () => {
-    if (elapsedTime > 0) {
+        if (startTimestamp) {
+            await stopTimerAndSave();
+            setStartTimestamp(null);
+        } else {
+            setStartTimestamp(Date.now());
+            setElapsedTime(1);
+        }
+    };
+
+    const handleProjectPress = (project) => {
+    setSelectedProject(project);
+    setModalVisible(true);
+};
+
+
+    const stopTimerAndSave = async () => {
+        setIsLoading(true);
+        const elapsed = getElapsedTime();
+        await saveElapsedTimeToFirestore(selectedProject.id, elapsed);
+        await fetchProjects();
+        setElapsedTime(0);
+        setIsLoading(false);
+    };
+
+    const closeModalAndReset = async () => {
+        setModalVisible(false);
         await stopTimerAndSave();
-    } else {
-        setElapsedTime(1);
-    }
-};
-
-const closeModalAndReset = async () => {
-    setModalVisible(false);
-    await stopTimerAndSave();
-};
-
-
-
-
+    };
 
     const formatTime = (seconds) => {
         const hrs = Math.floor(seconds / 3600);
@@ -152,7 +140,7 @@ const closeModalAndReset = async () => {
                         <Text style={styles.elapsedTimeListItem}>Zeit: {selectedProject.elapsedTime}</Text>
                         <Text style={styles.elapsedTimeText}>{formatTime(elapsedTime)}</Text>
                         <TouchableOpacity style={styles.startStopButton} onPress={handleStartStop}>
-                            <Text>{elapsedTime > 0 ? "Stop" : "Start"}</Text>
+                            <Text>{startTimestamp ? "Stop" : "Start"}</Text>
                         </TouchableOpacity>
                     </View>
                 </Modal>
@@ -185,8 +173,6 @@ const styles = StyleSheet.create({
     },
     modalText: {
         fontSize: 18,
-        alignItems: 'start',
-        justifyContent: 'start'
     },
     closeButton: {
         position: 'absolute',
