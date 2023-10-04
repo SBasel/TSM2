@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
+    marginBottom: 20, // space between heading and inputs
   },
   input: {
     borderWidth: 1,
