@@ -34,5 +34,3 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# Firebase Data
-firebaseConfigSecret.js
