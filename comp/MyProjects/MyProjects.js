@@ -23,25 +23,40 @@ export function MyProjects() {
     };
 
     const fetchProjects = async () => {
-        if (!userId) {
-            console.error("User ID not available.");
-            return;
-        }
+    if (!userId) {
+        console.error("User ID not available.");
+        return;
+    }
 
-        const projectsRef = collection(db, 'projects');
-        const q = query(projectsRef, where('userId', '==', userId));
-        onSnapshot(q, (querySnapshot) => {
-            const projectsList = [];
-            querySnapshot.forEach(doc => {
-                const project = {
-                    id: doc.id,
-                    ...doc.data()
-                };
-                projectsList.push(project);
-            });
-            setProjects(projectsList);
+    const projectsRef = collection(db, 'projects');
+    const q = query(projectsRef, where('userId', '==', userId));
+    
+    onSnapshot(q, (querySnapshot) => {
+        const projectsList = [];
+        let updatedProject = null;
+        
+        querySnapshot.forEach(doc => {
+            const project = {
+                id: doc.id,
+                ...doc.data()
+            };
+            
+            if (project.id === selectedProject?.id) {
+                updatedProject = project;
+            }
+            
+            projectsList.push(project);
         });
-    };
+
+        setProjects(projectsList);
+
+        // Wenn ein aktualisiertes Projekt gefunden wurde, setzen Sie selectedProject
+        if (updatedProject) {
+            setSelectedProject(updatedProject);
+        }
+    });
+};
+
 
     useEffect(() => {
         if (userId) {
@@ -76,18 +91,28 @@ export function MyProjects() {
 
 
     const stopTimerAndSave = async () => {
-        setIsLoading(true);
-        const elapsed = getElapsedTime();
-        await saveElapsedTimeToFirestore(selectedProject.id, elapsed);
-        await fetchProjects();
-        setElapsedTime(0);
-        setIsLoading(false);
-    };
+    setIsLoading(true);
+    const elapsed = getElapsedTime();
+    await saveElapsedTimeToFirestore(selectedProject.id, elapsed);
+    
+    await fetchProjects(); // Nach diesem Aufruf ist die projects-Liste aktualisiert
+
+    // Suchen Sie das gerade aktualisierte Projekt in der projects-Liste
+    const updatedProject = projects.find(project => project.id === selectedProject.id);
+
+    // Aktualisieren Sie den Wert von selectedProject mit den neuen Daten
+    setSelectedProject(updatedProject);
+    
+    setElapsedTime(0);
+    setIsLoading(false);
+};
 
     const closeModalAndReset = async () => {
-        setModalVisible(false);
-        await stopTimerAndSave();
-    };
+    setModalVisible(false);
+    setStartTimestamp(null); // Stellen Sie sicher, dass dieser Aufruf hier ist
+    await stopTimerAndSave();
+};
+
 
     const formatTime = (seconds) => {
         const hrs = Math.floor(seconds / 3600);
@@ -137,7 +162,7 @@ export function MyProjects() {
                         <Text style={styles.modalText}>Enddatum: {selectedProject.endDate}</Text>
                         <Text style={styles.modalText}>Typ: {selectedProject.selectedProjectType}</Text>
                         <Text style={styles.modalText}>Sprachen: {selectedProject.selectedLanguages.join(', ')}</Text>
-                        <Text style={styles.elapsedTimeListItem}>Zeit: {selectedProject.elapsedTime}</Text>
+                        <Text style={styles.elapsedTimeListItem}>Zeit: {formatTime(selectedProject.elapsedTime || 0)}</Text>
                         <Text style={styles.elapsedTimeText}>{formatTime(elapsedTime)}</Text>
                         <TouchableOpacity style={styles.startStopButton} onPress={handleStartStop}>
                             <Text>{startTimestamp ? "Stop" : "Start"}</Text>
