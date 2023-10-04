@@ -33,7 +33,7 @@ export function Home({ navigation }) {
         
       </View>
       <View>
-        <Image source={require('../assets/HeroTMS.png')} style={styles.image} />
+        <Image source={require('../../my-app/assets/HeroTMS.png')} style={styles.image} />
       </View>
     </View>
   );
