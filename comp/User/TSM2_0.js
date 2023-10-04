@@ -56,7 +56,6 @@ export function TSM2_0() {
             onPress={() => setModalVisible(false)}>
             <FontAwesomeIcon icon={faTimes} size={24} />
           </TouchableOpacity>
-          <Text style={{ marginBottom: 20 }}>Konto</Text>
           <Text onPress={handleLogout}>Logout</Text>
         </View>
       </Modal>
