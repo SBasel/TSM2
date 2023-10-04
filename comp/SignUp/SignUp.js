@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native'; // Import TouchableOpacity
 import { createNewUserWithEmailAndPassword } from '../firbase/auth/auth.emailAndPassword';
 import { SignInWithGooglePopup } from '../firbase/auth/auth.googlePopup';
-
 
 export function SignUp({ navigation }) {
   const [formValue, setFormValue] = React.useState({
@@ -68,24 +67,29 @@ export function SignUp({ navigation }) {
         placeholder="Email"
         value={formValue.email}
         onChangeText={(text) => setFormValue(prev => ({ ...prev, email: text }))}
-        style={{ borderWidth: 1, width: 200, marginBottom: 10 }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Password"
         value={formValue.password}
         onChangeText={(text) => setFormValue(prev => ({ ...prev, password: text }))}
         secureTextEntry
-        style={{ borderWidth: 1, width: 200, marginBottom: 10 }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Confirm Password"
         value={formValue.confirmPassword}
         onChangeText={(text) => setFormValue(prev => ({ ...prev, confirmPassword: text }))}
         secureTextEntry
-        style={{ borderWidth: 1, width: 200, marginBottom: 10 }}
+        style={styles.input}
       />
-      <Button title="Sign Up with Email" onPress={handleEmailSignUp} />
-      <Button title="Sign Up with Google" onPress={SignInWithGooglePopup} />
+      <TouchableOpacity style={styles.button} onPress={handleEmailSignUp}>
+        <Text style={styles.buttonText}>Sign Up with Email</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity style={styles.button} onPress={SignInWithGooglePopup}>
+        <Text style={styles.buttonText}>Sign Up with Google</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -99,6 +103,26 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
+    marginBottom: 20, // space between heading and inputs
+  },
+  input: {
+    borderWidth: 1,
+    width: 250, // increased width
+    fontSize: 18, // increased font size
+    padding: 10, // added padding for bigger touch area
+    marginBottom: 15, // increased space between inputs
+  },
+  button: {
+    marginTop: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 5,
+    backgroundColor: '#007BFF',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
 

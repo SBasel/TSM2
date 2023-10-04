@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { auth } from "../firbase/firebase.settings";
 import { signInThisUserWithEmailAndPassword } from '../firbase/auth/auth.emailAndPassword';
 import { SignInWithGooglePopup } from '../firbase/auth/auth.googlePopup';
 import { useNavigation } from '@react-navigation/native';
-
 
 export function Login() {
   const [email, setEmail] = React.useState('');
@@ -45,17 +44,23 @@ const handleEmailLogin = async () => {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        style={{ borderWidth: 1, width: 200, marginBottom: 10 }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, width: 200, marginBottom: 10 }}
+        style={styles.input}
       />
-      <Button title="Login with Email" onPress={handleEmailLogin} />
-      <Button title="Login with Google" onPress={() => SignInWithGooglePopup(navigation)} />
+      
+      <TouchableOpacity style={styles.button} onPress={handleEmailLogin}>
+        <Text style={styles.buttonText}>Login with Email</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity style={styles.button} onPress={() => SignInWithGooglePopup(navigation)}>
+        <Text style={styles.buttonText}>Login with Google</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -69,5 +74,24 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
+  },
+  input: {
+    borderWidth: 1,
+    width: 250, // increased width
+    fontSize: 18, // increased font size
+    padding: 10, // added padding for bigger touch area
+    marginBottom: 15, // increased space between inputs
+  },
+  button: {
+    marginTop: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 5,
+    backgroundColor: '#007BFF',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
