@@ -5,6 +5,7 @@ import { signInThisUserWithEmailAndPassword } from '../firbase/auth/auth.emailAn
 import { SignInWithGooglePopup } from '../firbase/auth/auth.googlePopup';
 import { useNavigation } from '@react-navigation/native';
 
+
 export function Login() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
