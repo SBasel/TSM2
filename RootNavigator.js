@@ -5,24 +5,25 @@ import { SignUp } from './comp/SignUp/SignUp';
 import { Login } from './comp/Login/Login';
 import { TSM2_0 } from './comp/User/TSM2_0';
 import { NewProject } from './comp/newProject/NewProject';
+import { MyProjects } from './comp/MyProjects/MyProjects';
 import { RegistrationSuccess } from './comp/SignUp/RegistrationSuccess';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 
 const Stack = createStackNavigator();
 
-// UserNavigator: Beinhaltet alle Bildschirme für angemeldete Benutzer
+
 function UserNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="TSM2.0" component={TSM2_0} />
       <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccess} />
       <Stack.Screen name="NewProject" component={NewProject} />
-      {/* Fügen Sie hier weitere Bildschirme hinzu, falls nötig */}
+      <Stack.Screen name="MyProjects" component={MyProjects} />
     </Stack.Navigator>
   );
 }
 
-// RootNavigator: Der Haupt-Navigator
+
 export function RootNavigator({ initialRouteName = "Home" }) {
   return (
     <Stack.Navigator initialRouteName={initialRouteName}>
