@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, CheckBox } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { addProjectToFirestore } from '../firbase/data/firestoreUtility';
+import { auth } from '../firbase/firebase.settings';
+
 
 const languageOptions = [
   { id: 'java', label: 'Java' },
@@ -24,21 +27,24 @@ export function NewProject() {
     html: false,
     css: false
   });
+  const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     const selectedLanguagesList = Object.keys(languages).filter(lang => languages[lang]);
     const projectData = {
-      projectName,
-      customer,
-      startDate,
-      endDate,
-      selectedProjectType,
-      selectedLanguages: selectedLanguagesList,
-      numberOfPages,
-      difficulty
+        userId, 
+        projectName,
+        startDate,
+        endDate,
+        selectedProjectType,
+        selectedLanguages: selectedLanguagesList,
+        numberOfPages,
+        difficulty
     };
-    console.log(projectData);
-  };
+    
+    await addProjectToFirestore(projectData);
+};
 
   return (
     <View style={styles.container}>
@@ -121,11 +127,11 @@ const styles = StyleSheet.create({
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 20,    // horizontaler Abstand zwischen den Checkboxen
-    marginBottom: 10   // vertikaler Abstand zwischen den Checkboxen
+    marginRight: 20,
+    marginBottom: 10
   },
   picker: {
-    height: 40,   // Setzen Sie die gewünschte Höhe für den Picker
+    height: 40,
     borderWidth: 1,
     borderColor: 'grey',
     marginBottom: 15
