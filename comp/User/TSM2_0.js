@@ -36,8 +36,8 @@ export function TSM2_0() {
       </TouchableOpacity>
     </View>
 
-    <TouchableOpacity style={styles.button} >
-      <Text style={styles.buttonText} onPress={() => navigation.navigate('MyProjects')}>My Projects</Text>
+    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('MyProjects')} >
+      <Text style={styles.buttonText} >My Projects</Text>
     </TouchableOpacity>
     <TouchableOpacity style={styles.button} >
       <Text style={styles.buttonText} onPress={() => navigation.navigate('NewProject')}>New Project</Text>
