@@ -19,7 +19,7 @@ export function MyProjects() {
 
     const getElapsedTime = () => {
         if (!startTimestamp) return 0;
-        return Math.floor((Date.now() - startTimestamp) / 1000); // in Sekunden
+        return Math.floor((Date.now() - startTimestamp) / 1000); 
     };
 
     const fetchProjects = async () => {
@@ -50,7 +50,6 @@ export function MyProjects() {
 
         setProjects(projectsList);
 
-        // Wenn ein aktualisiertes Projekt gefunden wurde, setzen Sie selectedProject
         if (updatedProject) {
             setSelectedProject(updatedProject);
         }
@@ -95,12 +94,12 @@ export function MyProjects() {
     const elapsed = getElapsedTime();
     await saveElapsedTimeToFirestore(selectedProject.id, elapsed);
     
-    await fetchProjects(); // Nach diesem Aufruf ist die projects-Liste aktualisiert
+    await fetchProjects(); 
 
-    // Suchen Sie das gerade aktualisierte Projekt in der projects-Liste
+    
     const updatedProject = projects.find(project => project.id === selectedProject.id);
 
-    // Aktualisieren Sie den Wert von selectedProject mit den neuen Daten
+    
     setSelectedProject(updatedProject);
     
     setElapsedTime(0);
@@ -109,7 +108,7 @@ export function MyProjects() {
 
     const closeModalAndReset = async () => {
     setModalVisible(false);
-    setStartTimestamp(null); // Stellen Sie sicher, dass dieser Aufruf hier ist
+    setStartTimestamp(null); 
     await stopTimerAndSave();
 };
 
