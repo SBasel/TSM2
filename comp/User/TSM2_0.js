@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 
 export function TSM2_0() {
   const user = auth.currentUser;
+  const userEmail = user?.email; // Hier verwenden wir den optionalen Chaining-Operator.
   const [isModalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -15,12 +16,14 @@ export function TSM2_0() {
     auth.signOut()
     .then(() => {
         console.log('Successfully logged out');
+        setModalVisible(false);  
         navigation.navigate('Home');  
     })
     .catch(error => {
         console.error('Error logging out:', error);
     });
-}
+  }
+
 
 
 
@@ -29,7 +32,7 @@ export function TSM2_0() {
     <View style={styles.header}>
       <View style={styles.leftContainer}>
         <Text style={styles.welcomeText}>Willkommen,</Text>
-        <Text style={styles.userEmail}>{user.email}</Text>
+        <Text style={styles.userEmail}>{userEmail}</Text>
       </View>
       <TouchableOpacity style={styles.menuIcon} onPress={() => setModalVisible(true)}>
         <FontAwesomeIcon icon={faBars} size={24} />
@@ -53,12 +56,18 @@ export function TSM2_0() {
         <View style={styles.modalContainer}>
           <TouchableOpacity 
             style={styles.closeButton} 
-            onPress={() => setModalVisible(false)}>
+            onPress={() => setModalVisible(false)}
+            hitSlop={{top: 20, bottom: 20, left: 20, right: 20}} // hitSlop hinzufügen
+            >
             <FontAwesomeIcon icon={faTimes} size={24} />
           </TouchableOpacity>
-          <Text onPress={handleLogout}>Logout</Text>
+
+          <Text style={styles.modalOption}>Konto</Text>
+          <Text style={styles.modalOption} >DarkMode</Text>
+          <Text style={styles.modalOption} onPress={handleLogout}>Logout</Text>
         </View>
       </Modal>
+
     </View>
   );
 }
@@ -111,15 +120,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(250, 250, 250, 1)',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 40, 
-    right: 40,
-  },
+  position: 'absolute', 
+  top: 85, // positionieren Sie das Modal unter dem Burger-Menü
+  right: 15, 
+  width: 200, // gewünschte Breite des Modals
+  backgroundColor: 'rgba(250, 250, 250, 1)',
+  borderRadius: 10, // optional, um die Ecken abzurunden
+  padding: 10,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+closeButton: {
+  position: 'absolute',
+  padding: 10,
+  top: 5, 
+  right: 5,
+  zIndex: 1,
+},
+modalOption: {
+  padding: 15,
+  borderBottomColor: 'grey',
+  borderBottomWidth: 1,
+},
 });
 
