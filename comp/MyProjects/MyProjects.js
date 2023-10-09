@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
 import { auth } from '../firbase/firebase.settings';
 import db from '../firbase/data/firestoreInit';
-import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTimes, faTrash, faPen, faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
 import { saveElapsedTimeToFirestore } from '../firbase/data/SaveElapsedTime';
 import { TimeInput } from './TimeInput'
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+
 
 export function MyProjects() {
     const [projects, setProjects] = useState([]);
@@ -18,6 +19,9 @@ export function MyProjects() {
     const [timingProjectId, setTimingProjectId] = useState(null);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [editedTime, setEditedTime] = useState({ hours: 0, minutes: 0, seconds: 0 });
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [projectToDelete, setProjectToDelete] = useState(null);
+
 
 
     const userId = auth.currentUser ? auth.currentUser.uid : null;
@@ -181,9 +185,28 @@ const handleSave = async () => {
     });
 
     closeEditModal();
-    fetchProjects(); // Refresh the projects to reflect the changes
+    fetchProjects(); 
 };
 
+const confirmDelete = (projectId) => {
+    setProjectToDelete(projectId);
+    setIsDeleteModalVisible(true);
+};
+
+
+
+
+const deleteFromFirestore = async (projectId) => {
+    if (!projectId) return;
+
+    try {
+      const projectRef = doc(db, 'projects', projectId);
+      await deleteDoc(projectRef); 
+      fetchProjects(); 
+    } catch (error) {
+      console.error("Error deleting project: ", error);
+    }
+};
 
     return (
     <View style={styles.container}>
@@ -214,7 +237,7 @@ const handleSave = async () => {
                                 <TouchableOpacity onPress={() => openEditModal(item)}>
                                 <FontAwesomeIcon icon={faPen} size={20} style={styles.iconButton} />
                                 </TouchableOpacity>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => confirmDelete(item.id)}>
                                     <FontAwesomeIcon icon={faTrash} size={20} style={styles.iconButton} />
                                 </TouchableOpacity>
                             </View>
@@ -287,6 +310,34 @@ const handleSave = async () => {
             <Text>Save</Text>
         </TouchableOpacity>
       </View>
+    </Modal>
+)}
+{projectToDelete && (
+    <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isDeleteModalVisible}
+        onRequestClose={() => setIsDeleteModalVisible(false)}>
+        <View style={styles.confirmDeleteCenteredView}>
+            <View style={styles.confirmDeleteModalView}>
+                <Text style={styles.confirmDeleteModalText}>Sind Sie sicher, dass Sie das Projekt löschen möchten?</Text>
+                <View style={styles.confirmDeleteButtonContainer}>
+                    <TouchableOpacity
+                        style={styles.confirmDeleteCancelButton}
+                        onPress={() => setIsDeleteModalVisible(false)}>
+                        <Text>Abbrechen</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.confirmDeleteDeleteButton}
+                        onPress={() => {
+                            deleteFromFirestore(projectToDelete);
+                            setIsDeleteModalVisible(false);
+                        }}>
+                        <Text style={styles.confirmDeleteDeleteText}>Löschen</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </View>
     </Modal>
 )}
     </View>
@@ -381,4 +432,54 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(250, 250, 250, 1)',
     },
+    confirmDeleteCenteredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22,
+    },
+    confirmDeleteModalView: {
+        width: '80%',
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    confirmDeleteButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    confirmDeleteCancelButton: {
+        backgroundColor: "#DDDDDD",
+        padding: 10,
+        borderRadius: 10,
+        margin: 5,
+    },
+    confirmDeleteDeleteButton: {
+        backgroundColor: "#FF0000",
+        padding: 10,
+        borderRadius: 10,
+        margin: 5,
+    },
+    confirmDeleteDeleteText: {
+        color: 'white',
+    },
+    confirmDeleteModalText: {
+        marginBottom: 15,
+        textAlign: "center",
+        fontSize: 18,
+    },
 });
+
+
+
