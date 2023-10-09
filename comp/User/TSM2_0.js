@@ -121,11 +121,11 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
   position: 'absolute', 
-  top: 85, // positionieren Sie das Modal unter dem Burger-Menü
+  top: 85,
   right: 15, 
-  width: 200, // gewünschte Breite des Modals
+  width: 200, 
   backgroundColor: 'rgba(250, 250, 250, 1)',
-  borderRadius: 10, // optional, um die Ecken abzurunden
+  borderRadius: 10,
   padding: 10,
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 2 },
